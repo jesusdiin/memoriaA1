@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Juego de Memoria</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      background: #f2f2f2;
+    }
+    h1 { margin-top: 10px; }
+    #game-board {
+      display: grid;
+      grid-template-columns: repeat(4, 100px);
+      grid-gap: 10px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+    .card {
+      width: 100px;
+      height: 100px;
+      background-color: #ddd;
+      border: 2px solid #333;
+      cursor: pointer;
+      position: relative;
+      perspective: 600px;
+    }
+    .card.flip .front { transform: rotateY(180deg); }
+    .card.flip .back { transform: rotateY(0deg); }
+    .card .front, .card .back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      transition: transform 0.4s;
+    }
+    .card .front {
+      transform: rotateY(0deg);
+      background: #bbb;
+    }
+    .card .back {
+      transform: rotateY(180deg);
+      background-size: cover;
+      background-position: center;
+    }
+    #timer { margin-top: 15px; font-size: 20px; }
+    #top-scores { margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <h1>Juego de Memoria</h1>
+  <div id="timer">Tiempo: 0s</div>
+  <div id="game-board"></div>
+  <div id="top-scores">
+    <h2>Top 5 Tiempos</h2>
+    <ol id="score-list"></ol>
+  </div>
+
+  <script>
+    const images = [
+      'https://i.imgur.com/nLNtKv4.png',
+      'https://i.imgur.com/xksxztO.jpeg',
+      'https://i.imgur.com/J8sPTJQ.jpeg',
+      'https://i.imgur.com/x96IVje.jpeg',
+      'https://i.imgur.com/iYz3DLj.jpeg',
+      'https://i.imgur.com/HgPrKpC.jpeg'
+    ];
+
+    let cards = [...images, ...images];
+    cards = cards.sort(() => 0.5 - Math.random());
+    let firstCard = null, secondCard = null, lockBoard = false;
+    let matchedPairs = 0;
+    let startTime, timerInterval;
+
+    const board = document.getElementById('game-board');
+    const timerDisplay = document.getElementById('timer');
+
+    function startTimer() {
+      startTime = Date.now();
+      timerInterval = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+        timerDisplay.textContent = `Tiempo: ${elapsed}s`;
+      }, 1000);
+    }
+
+    function stopTimer() {
+      clearInterval(timerInterval);
+      return Math.floor((Date.now() - startTime) / 1000);
+    }
+
+    function createCard(image) {
+      const card = document.createElement('div');
+      card.classList.add('card');
+
+      const front = document.createElement('div');
+      front.classList.add('front');
+
+      const back = document.createElement('div');
+      back.classList.add('back');
+      back.style.backgroundImage = `url(${image})`;
+
+      card.appendChild(front);
+      card.appendChild(back);
+
+      card.addEventListener('click', () => {
+        if (lockBoard || card.classList.contains('flip')) return;
+
+        card.classList.add('flip');
+        if (!startTime) startTimer();
+
+        if (!firstCard) {
+          firstCard = card;
+        } else {
+          secondCard = card;
+          checkMatch();
+        }
+      });
+
+      return card;
+    }
+
+    function checkMatch() {
+      lockBoard = true;
+      const img1 = firstCard.querySelector('.back').style.backgroundImage;
+      const img2 = secondCard.querySelector('.back').style.backgroundImage;
+
+      if (img1 === img2) {
+        matchedPairs++;
+        resetTurn();
+        if (matchedPairs === images.length) {
+          const finalTime = stopTimer();
+          saveScore(finalTime);
+          alert(`¡Ganaste! Tiempo: ${finalTime}s`);
+          showScores();
+        }
+      } else {
+        setTimeout(() => {
+          firstCard.classList.remove('flip');
+          secondCard.classList.remove('flip');
+          resetTurn();
+        }, 800);
+      }
+    }
+
+    function resetTurn() {
+      [firstCard, secondCard] = [null, null];
+      lockBoard = false;
+    }
+
+    function saveScore(seconds) {
+      const scores = JSON.parse(localStorage.getItem('memoryScores') || '[]');
+      scores.push(seconds);
+      scores.sort((a, b) => a - b);
+      localStorage.setItem('memoryScores', JSON.stringify(scores.slice(0, 5)));
+    }
+
+    function showScores() {
+      const list = document.getElementById('score-list');
+      list.innerHTML = '';
+      const scores = JSON.parse(localStorage.getItem('memoryScores') || '[]');
+      scores.forEach(time => {
+        const li = document.createElement('li');
+        li.textContent = `${time} segundos`;
+        list.appendChild(li);
+      });
+    }
+
+    function init() {
+      board.innerHTML = '';
+      cards.forEach(image => {
+        board.appendChild(createCard(image));
+      });
+      showScores();
+    }
+
+    init();
+  </script>
+</body>
+</html>
