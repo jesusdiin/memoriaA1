@@ -2,21 +2,20 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Juego de Memoria</title>
+  <title>Juego de Memoria A1</title>
   <style>
     body {
       font-family: sans-serif;
       text-align: center;
-      background: #007BFF; /* Azul */
+      background: #007BFF;
       color: #fff;
       margin: 0;
       padding: 20px;
     }
-
-    h1 {
-      color: #ffeb3b; /* Amarillo */
+    h1 { color: #ffeb3b; }
+    #level-selector {
+      margin: 15px auto;
     }
-
     #game-board {
       display: grid;
       grid-template-columns: repeat(4, 100px);
@@ -24,21 +23,18 @@
       justify-content: center;
       margin-top: 20px;
     }
-
     .card {
       width: 100px;
       height: 100px;
-      background-color: #ffffff; /* Blanco */
-      border: 3px solid #4CAF50; /* Verde */
+      background-color: #ffffff;
+      border: 3px solid #4CAF50;
       cursor: pointer;
       position: relative;
       perspective: 600px;
       border-radius: 10px;
     }
-
     .card.flip .front { transform: rotateY(180deg); }
     .card.flip .back { transform: rotateY(0deg); }
-
     .card .front, .card .back {
       position: absolute;
       width: 100%;
@@ -47,45 +43,29 @@
       transition: transform 0.4s;
       border-radius: 10px;
     }
-
-    .card .front {
-      transform: rotateY(0deg);
-      background: #ccc;
-    }
-
+    .card .front { transform: rotateY(0deg); background: #ccc; }
     .card .back {
       transform: rotateY(180deg);
       background-size: cover;
       background-position: center;
     }
-
-    #timer {
-      margin-top: 15px;
-      font-size: 20px;
-    }
-
+    #timer { margin-top: 15px; font-size: 20px; }
     input {
       padding: 5px;
       border-radius: 5px;
       border: none;
       margin: 10px 0;
     }
-
     #top-scores {
       margin-top: 30px;
       background: #ffffff22;
       padding: 15px;
       border-radius: 10px;
     }
-
     #score-list {
       text-align: left;
       max-width: 300px;
       margin: auto;
-    }
-
-    audio {
-      display: none;
     }
   </style>
 </head>
@@ -97,6 +77,18 @@
     <input type="text" id="nombreJugador" placeholder="Escribe tu nombre...">
   </div>
 
+  <div id="level-selector">
+    <label>Nivel:</label>
+    <select id="nivel">
+      <option value="4">Nivel 1 - 4 pares</option>
+      <option value="5">Nivel 2 - 5 pares</option>
+      <option value="6">Nivel 3 - 6 pares</option>
+      <option value="7">Nivel 4 - 7 pares</option>
+      <option value="8">Nivel 5 - 8 pares</option>
+    </select>
+    <button onclick="init()">Iniciar Juego</button>
+  </div>
+
   <div id="timer">Tiempo: 0s</div>
   <div id="game-board"></div>
 
@@ -105,27 +97,24 @@
     <ol id="score-list"></ol>
   </div>
 
-  <!-- Música de fondo -->
-  <audio id="musicaFondo" autoplay loop>
-    <source src="musica.mp3" type="audio/mpeg">
-    Tu navegador no soporta audio.
-  </audio>
-
   <script>
-    const images = [
+    const allImages = [
       'https://i.imgur.com/PLnNFRY.jpeg',
       'https://i.imgur.com/xksxztO.jpeg',
       'https://i.imgur.com/J8sPTJQ.jpeg',
       'https://i.imgur.com/x96IVje.jpeg',
       'https://i.imgur.com/iYz3DLj.jpeg',
-      'https://i.imgur.com/HgPrKpC.jpeg'
+      'https://i.imgur.com/HgPrKpC.jpeg',
+      'https://i.imgur.com/FN29Lbk.jpeg',
+      'https://i.imgur.com/EuvCj1h.jpeg'
     ];
 
-    let cards = [...images, ...images];
-    cards = cards.sort(() => 0.5 - Math.random());
-    let firstCard = null, secondCard = null, lockBoard = false;
+    const SHEET_URL = "https://api.sheetbest.com/sheets/eb14502a-3c04-4b3f-b442-513c774e0ae5";
+
+    let cards = [], firstCard = null, secondCard = null, lockBoard = false;
     let matchedPairs = 0;
     let startTime, timerInterval;
+    let scores = [];
 
     const board = document.getElementById('game-board');
     const timerDisplay = document.getElementById('timer');
@@ -181,11 +170,31 @@
 
       if (img1 === img2) {
         matchedPairs++;
+
+        const baneada = 'url("https://i.imgur.com/iYz3DLj.jpeg")';
+        if (img1 === baneada) {
+          [firstCard, secondCard].forEach(card => {
+            card.innerHTML = '';
+            const texto = document.createElement('div');
+            texto.textContent = 'BANEADO';
+            texto.style.color = 'red';
+            texto.style.fontWeight = 'bold';
+            texto.style.fontSize = '18px';
+            texto.style.display = 'flex';
+            texto.style.justifyContent = 'center';
+            texto.style.alignItems = 'center';
+            texto.style.height = '100%';
+            card.appendChild(texto);
+          });
+        }
+
         resetTurn();
-        if (matchedPairs === images.length) {
+        if (matchedPairs === cards.length / 2) {
           const finalTime = stopTimer();
           const nombre = document.getElementById('nombreJugador').value.trim() || "Anónimo";
-          saveScore(finalTime, nombre);
+          scores.push({ nombre, tiempo: finalTime });
+
+          saveScore({ nombre, tiempo: finalTime });
           alert(`¡Ganaste, ${nombre}! Tiempo: ${finalTime}s`);
           showScores();
         }
@@ -203,29 +212,59 @@
       lockBoard = false;
     }
 
-    function saveScore(seconds, nombre) {
-      const scores = JSON.parse(localStorage.getItem('memoryScores') || '[]');
-      scores.push({ nombre, tiempo: seconds });
-      scores.sort((a, b) => a.tiempo - b.tiempo);
-      localStorage.setItem('memoryScores', JSON.stringify(scores.slice(0, 5)));
+    function saveScore(score) {
+      fetch(SHEET_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          nombre: score.nombre,
+          tiempo: score.tiempo,
+          fecha: new Date().toISOString()
+        })
+      })
+      .then(() => console.log("Puntaje guardado"))
+      .catch(err => console.error("Error al guardar:", err));
     }
 
     function showScores() {
       const list = document.getElementById('score-list');
-      list.innerHTML = '';
-      const scores = JSON.parse(localStorage.getItem('memoryScores') || '[]');
-      scores.forEach(p => {
-        const li = document.createElement('li');
-        li.textContent = `${p.nombre}: ${p.tiempo} segundos`;
-        list.appendChild(li);
-      });
+      list.innerHTML = '<li>Cargando...</li>';
+
+      fetch(SHEET_URL)
+        .then(res => res.json())
+        .then(data => {
+          const ordenados = data
+            .filter(p => p.nombre && p.tiempo)
+            .sort((a, b) => a.tiempo - b.tiempo)
+            .slice(0, 5);
+          list.innerHTML = '';
+          ordenados.forEach(p => {
+            const li = document.createElement('li');
+            li.textContent = `${p.nombre}: ${p.tiempo} segundos`;
+            list.appendChild(li);
+          });
+        })
+        .catch(err => {
+          list.innerHTML = '<li>Error al cargar datos.</li>';
+          console.error("Error al mostrar:", err);
+        });
     }
 
     function init() {
+      const nivel = parseInt(document.getElementById('nivel').value);
+      const selectedImages = allImages.slice(0, nivel);
+      cards = [...selectedImages, ...selectedImages].sort(() => 0.5 - Math.random());
+
       board.innerHTML = '';
+      matchedPairs = 0;
+      clearInterval(timerInterval);
+      timerDisplay.textContent = 'Tiempo: 0s';
+      startTime = null;
+
       cards.forEach(image => {
         board.appendChild(createCard(image));
       });
+
       showScores();
     }
 
@@ -233,6 +272,7 @@
   </script>
 </body>
 </html>
+
 
 
    
