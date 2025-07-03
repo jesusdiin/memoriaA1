@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -80,7 +79,6 @@
   </div>
 
   <div id="nivelActual">Nivel 1 de 5</div>
-
   <div id="timer">Tiempo: 0s</div>
   <div id="game-board"></div>
 
@@ -89,10 +87,10 @@
     <ol id="score-list"></ol>
   </div>
 
-  <audio id="flipSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_96264a6a39.mp3?filename=button-124476.mp3"></audio>
-  <audio id="matchSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_3d4c8c3934.mp3?filename=correct-2-46134.mp3"></audio>
-  <audio id="winSound" src="https://cdn.pixabay.com/download/audio/2022/10/28/audio_063646bc12.mp3?filename=success-1-6297.mp3"></audio>
-  <audio id="endSound" src="https://cdn.pixabay.com/download/audio/2022/10/19/audio_1e23d3df79.mp3?filename=win-tune-20656.mp3"></audio>
+  <audio id="flipSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_96264a6a39.mp3"></audio>
+  <audio id="matchSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_3d4c8c3934.mp3"></audio>
+  <audio id="winSound" src="https://cdn.pixabay.com/download/audio/2022/10/28/audio_063646bc12.mp3"></audio>
+  <audio id="endSound" src="https://cdn.pixabay.com/download/audio/2022/10/19/audio_1e23d3df79.mp3"></audio>
 
   <script>
     const allImages = [
@@ -118,6 +116,7 @@
     const board = document.getElementById('game-board');
     const timerDisplay = document.getElementById('timer');
     const nivelDisplay = document.getElementById('nivelActual');
+
     const flipSound = document.getElementById('flipSound');
     const matchSound = document.getElementById('matchSound');
     const winSound = document.getElementById('winSound');
@@ -156,7 +155,7 @@
 
         flipSound.play();
         card.classList.add('flip');
-        if (!startTime && nivelActual === 4) startTimer();
+        if (!startTime) startTimer();
 
         if (!firstCard) {
           firstCard = card;
@@ -178,7 +177,8 @@
         matchedPairs++;
         matchSound.play();
 
-        if (img1.includes('PLnNFRY.jpeg')) {
+        // 💥 Explosión para PLnNFRY.jpeg
+        if (img1.includes("PLnNFRY.jpeg")) {
           [firstCard, secondCard].forEach(card => {
             const explosion = document.createElement('img');
             explosion.src = 'https://i.imgur.com/ZQZSWrt.gif';
@@ -187,14 +187,15 @@
             explosion.style.height = '100px';
             explosion.style.top = '0';
             explosion.style.left = '0';
-            explosion.style.borderRadius = '10px';
             explosion.style.zIndex = '10';
+            explosion.style.borderRadius = '10px';
             card.appendChild(explosion);
             setTimeout(() => explosion.remove(), 1000);
           });
         }
 
-        if (img1.includes('x96IVje.jpeg')) {
+        // 🏳️‍🌈 Bandera para x96IVje.jpeg
+        if (img1.includes("x96IVje.jpeg")) {
           [firstCard, secondCard].forEach(card => {
             const bandera = document.createElement('img');
             bandera.src = 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/Gay_Pride_Flag.svg/320px-Gay_Pride_Flag.svg.png';
@@ -204,10 +205,10 @@
             bandera.style.top = '0';
             bandera.style.left = '0';
             bandera.style.opacity = '0.85';
-            bandera.style.borderRadius = '10px';
             bandera.style.zIndex = '10';
+            bandera.style.borderRadius = '10px';
             card.appendChild(bandera);
-            setTimeout(() => bandera.remove(), 1200);
+            setTimeout(() => bandera.remove(), 1000);
           });
         }
 
@@ -229,6 +230,7 @@
         }
 
         resetTurn();
+
         if (matchedPairs === cards.length / 2) {
           stopTimer();
           winSound.play();
@@ -240,7 +242,6 @@
             endSound.play();
             const nombre = document.getElementById('nombreJugador').value.trim() || "Anónimo";
             const tiempoFinal = tiempoAcumulado;
-            scores.push({ nombre, tiempo: tiempoFinal });
             saveScore({ nombre, tiempo: tiempoFinal });
             alert(`¡Felicidades ${nombre}! Completaste todos los niveles en ${tiempoFinal}s`);
             showScores();
@@ -264,7 +265,7 @@
     }
 
     function saveScore(score) {
-      fetch(SHEET_URL, {
+      fetch("https://api.sheetbest.com/sheets/eb14502a-3c04-4b3f-b442-513c774e0ae5", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -281,7 +282,7 @@
       const list = document.getElementById('score-list');
       list.innerHTML = '<li>Cargando...</li>';
 
-      fetch(SHEET_URL)
+      fetch("https://api.sheetbest.com/sheets/eb14502a-3c04-4b3f-b442-513c774e0ae5")
         .then(res => res.json())
         .then(data => {
           const ordenados = data
@@ -297,7 +298,6 @@
         })
         .catch(err => {
           list.innerHTML = '<li>Error al cargar datos.</li>';
-          console.error("Error al mostrar:", err);
         });
     }
 
@@ -308,6 +308,7 @@
       board.innerHTML = '';
       matchedPairs = 0;
       startTime = null;
+      timerDisplay.textContent = `Tiempo: ${tiempoAcumulado}s`;
       nivelDisplay.textContent = `Nivel ${nivelActual - 3} de 5`;
 
       cards.forEach(image => {
@@ -321,6 +322,7 @@
   </script>
 </body>
 </html>
+
 
 
 
