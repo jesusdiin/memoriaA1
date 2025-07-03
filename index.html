@@ -7,9 +7,16 @@
     body {
       font-family: sans-serif;
       text-align: center;
-      background: #f2f2f2;
+      background: #007BFF; /* Azul */
+      color: #fff;
+      margin: 0;
+      padding: 20px;
     }
-    h1 { margin-top: 10px; }
+
+    h1 {
+      color: #ffeb3b; /* Amarillo */
+    }
+
     #game-board {
       display: grid;
       grid-template-columns: repeat(4, 100px);
@@ -17,45 +24,92 @@
       justify-content: center;
       margin-top: 20px;
     }
+
     .card {
       width: 100px;
       height: 100px;
-      background-color: #ddd;
-      border: 2px solid #333;
+      background-color: #ffffff; /* Blanco */
+      border: 3px solid #4CAF50; /* Verde */
       cursor: pointer;
       position: relative;
       perspective: 600px;
+      border-radius: 10px;
     }
+
     .card.flip .front { transform: rotateY(180deg); }
     .card.flip .back { transform: rotateY(0deg); }
+
     .card .front, .card .back {
       position: absolute;
       width: 100%;
       height: 100%;
       backface-visibility: hidden;
       transition: transform 0.4s;
+      border-radius: 10px;
     }
+
     .card .front {
       transform: rotateY(0deg);
-      background: #bbb;
+      background: #ccc;
     }
+
     .card .back {
       transform: rotateY(180deg);
       background-size: cover;
       background-position: center;
     }
-    #timer { margin-top: 15px; font-size: 20px; }
-    #top-scores { margin-top: 20px; }
+
+    #timer {
+      margin-top: 15px;
+      font-size: 20px;
+    }
+
+    input {
+      padding: 5px;
+      border-radius: 5px;
+      border: none;
+      margin: 10px 0;
+    }
+
+    #top-scores {
+      margin-top: 30px;
+      background: #ffffff22;
+      padding: 15px;
+      border-radius: 10px;
+    }
+
+    #score-list {
+      text-align: left;
+      max-width: 300px;
+      margin: auto;
+    }
+
+    audio {
+      display: none;
+    }
   </style>
 </head>
 <body>
-  <h1>Juego de Memoria</h1>
+  <h1>🧠 Juego de Memoria A1</h1>
+
+  <div>
+    <label>Tu nombre:</label><br>
+    <input type="text" id="nombreJugador" placeholder="Escribe tu nombre...">
+  </div>
+
   <div id="timer">Tiempo: 0s</div>
   <div id="game-board"></div>
+
   <div id="top-scores">
-    <h2>Top 5 Tiempos</h2>
+    <h2>🏆 Top 5 Tiempos</h2>
     <ol id="score-list"></ol>
   </div>
+
+  <!-- Música de fondo -->
+  <audio id="musicaFondo" autoplay loop>
+    <source src="musica.mp3" type="audio/mpeg">
+    Tu navegador no soporta audio.
+  </audio>
 
   <script>
     const images = [
@@ -130,8 +184,9 @@
         resetTurn();
         if (matchedPairs === images.length) {
           const finalTime = stopTimer();
-          saveScore(finalTime);
-          alert(`¡Ganaste! Tiempo: ${finalTime}s`);
+          const nombre = document.getElementById('nombreJugador').value.trim() || "Anónimo";
+          saveScore(finalTime, nombre);
+          alert(`¡Ganaste, ${nombre}! Tiempo: ${finalTime}s`);
           showScores();
         }
       } else {
@@ -148,10 +203,10 @@
       lockBoard = false;
     }
 
-    function saveScore(seconds) {
+    function saveScore(seconds, nombre) {
       const scores = JSON.parse(localStorage.getItem('memoryScores') || '[]');
-      scores.push(seconds);
-      scores.sort((a, b) => a - b);
+      scores.push({ nombre, tiempo: seconds });
+      scores.sort((a, b) => a.tiempo - b.tiempo);
       localStorage.setItem('memoryScores', JSON.stringify(scores.slice(0, 5)));
     }
 
@@ -159,9 +214,9 @@
       const list = document.getElementById('score-list');
       list.innerHTML = '';
       const scores = JSON.parse(localStorage.getItem('memoryScores') || '[]');
-      scores.forEach(time => {
+      scores.forEach(p => {
         const li = document.createElement('li');
-        li.textContent = `${time} segundos`;
+        li.textContent = `${p.nombre}: ${p.tiempo} segundos`;
         list.appendChild(li);
       });
     }
@@ -178,3 +233,7 @@
   </script>
 </body>
 </html>
+
+
+   
+
