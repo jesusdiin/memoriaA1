@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Juego de Memoria A1</title>
   <style>
     body {
@@ -12,7 +12,10 @@
       margin: 0;
       padding: 20px;
     }
-    h1 { color: #ffeb3b; margin-bottom: 5px; }
+    h1 {
+      color: #ffeb3b;
+      margin-bottom: 5px;
+    }
     #nivelActual {
       font-size: 18px;
       margin-bottom: 10px;
@@ -34,9 +37,14 @@
       perspective: 600px;
       border-radius: 10px;
     }
-    .card.flip .front { transform: rotateY(180deg); }
-    .card.flip .back { transform: rotateY(0deg); }
-    .card .front, .card .back {
+    .card.flip .front {
+      transform: rotateY(180deg);
+    }
+    .card.flip .back {
+      transform: rotateY(0deg);
+    }
+    .card .front,
+    .card .back {
       position: absolute;
       width: 100%;
       height: 100%;
@@ -44,13 +52,19 @@
       transition: transform 0.4s;
       border-radius: 10px;
     }
-    .card .front { transform: rotateY(0deg); background: #ccc; }
+    .card .front {
+      transform: rotateY(0deg);
+      background: #ccc;
+    }
     .card .back {
       transform: rotateY(180deg);
       background-size: cover;
       background-position: center;
     }
-    #timer { margin-top: 15px; font-size: 20px; }
+    #timer {
+      margin-top: 15px;
+      font-size: 20px;
+    }
     input {
       padding: 5px;
       border-radius: 5px;
@@ -74,8 +88,8 @@
   <h1>🧠 Juego de Memoria A1</h1>
 
   <div>
-    <label>Tu nombre:</label><br>
-    <input type="text" id="nombreJugador" placeholder="Escribe tu nombre...">
+    <label>Tu nombre:</label><br />
+    <input type="text" id="nombreJugador" placeholder="Escribe tu nombre..." />
   </div>
 
   <div id="nivelActual">Nivel 1 de 5</div>
@@ -94,39 +108,50 @@
 
   <script>
     const allImages = [
-      'https://i.imgur.com/PLnNFRY.jpeg',
-      'https://i.imgur.com/xksxztO.jpeg',
-      'https://i.imgur.com/J8sPTJQ.jpeg',
-      'https://i.imgur.com/x96IVje.jpeg',
-      'https://i.imgur.com/iYz3DLj.jpeg',
-      'https://i.imgur.com/HgPrKpC.jpeg',
-      'https://i.imgur.com/FN29Lbk.jpeg',
-      'https://i.imgur.com/EuvCj1h.jpeg'
+      "https://i.imgur.com/PLnNFRY.jpeg",
+      "https://i.imgur.com/xksxztO.jpeg",
+      "https://i.imgur.com/J8sPTJQ.jpeg",
+      "https://i.imgur.com/x96IVje.jpeg",
+      "https://i.imgur.com/iYz3DLj.jpeg",
+      "https://i.imgur.com/HgPrKpC.jpeg",
+      "https://i.imgur.com/FN29Lbk.jpeg",
+      "https://i.imgur.com/EuvCj1h.jpeg",
     ];
 
-    const SHEET_URL = "https://api.sheetbest.com/sheets/eb14502a-3c04-4b3f-b442-513c774e0ae5";
-
-    let cards = [], firstCard = null, secondCard = null, lockBoard = false;
+    let cards = [],
+      firstCard = null,
+      secondCard = null,
+      lockBoard = false;
     let matchedPairs = 0;
     let startTime, timerInterval;
-    let scores = [];
-    let nivelActual = 4;
     let tiempoAcumulado = 0;
+    let nivelActual = 4; // 4 pares = nivel 1, hasta 8 pares = nivel 5
 
-    const board = document.getElementById('game-board');
-    const timerDisplay = document.getElementById('timer');
-    const nivelDisplay = document.getElementById('nivelActual');
+    const MAX_TIEMPO = 130; // segundos
+    const TOTAL_NIVELES = 5;
 
-    const flipSound = document.getElementById('flipSound');
-    const matchSound = document.getElementById('matchSound');
-    const winSound = document.getElementById('winSound');
-    const endSound = document.getElementById('endSound');
+    const board = document.getElementById("game-board");
+    const timerDisplay = document.getElementById("timer");
+    const nivelDisplay = document.getElementById("nivelActual");
+
+    const flipSound = document.getElementById("flipSound");
+    const matchSound = document.getElementById("matchSound");
+    const winSound = document.getElementById("winSound");
+    const endSound = document.getElementById("endSound");
 
     function startTimer() {
       startTime = Date.now();
       timerInterval = setInterval(() => {
-        const elapsed = Math.floor((Date.now() - startTime + tiempoAcumulado * 1000) / 1000);
+        const elapsed = Math.floor(
+          (Date.now() - startTime + tiempoAcumulado * 1000) / 1000
+        );
         timerDisplay.textContent = `Tiempo: ${elapsed}s`;
+        if (elapsed >= MAX_TIEMPO) {
+          clearInterval(timerInterval);
+          endSound.play();
+          alert("¡Se acabó el tiempo!");
+          reiniciarJuego();
+        }
       }, 1000);
     }
 
@@ -137,24 +162,24 @@
     }
 
     function createCard(image) {
-      const card = document.createElement('div');
-      card.classList.add('card');
+      const card = document.createElement("div");
+      card.classList.add("card");
 
-      const front = document.createElement('div');
-      front.classList.add('front');
+      const front = document.createElement("div");
+      front.classList.add("front");
 
-      const back = document.createElement('div');
-      back.classList.add('back');
+      const back = document.createElement("div");
+      back.classList.add("back");
       back.style.backgroundImage = `url(${image})`;
 
       card.appendChild(front);
       card.appendChild(back);
 
-      card.addEventListener('click', () => {
-        if (lockBoard || card.classList.contains('flip')) return;
+      card.addEventListener("click", () => {
+        if (lockBoard || card.classList.contains("flip")) return;
 
         flipSound.play();
-        card.classList.add('flip');
+        card.classList.add("flip");
         if (!startTime) startTimer();
 
         if (!firstCard) {
@@ -170,43 +195,27 @@
 
     function checkMatch() {
       lockBoard = true;
-      const img1 = firstCard.querySelector('.back').style.backgroundImage;
-      const img2 = secondCard.querySelector('.back').style.backgroundImage;
+      const img1 = firstCard.querySelector(".back").style.backgroundImage;
+      const img2 = secondCard.querySelector(".back").style.backgroundImage;
 
       if (img1 === img2) {
         matchedPairs++;
         matchSound.play();
 
-        // 💥 Explosión para PLnNFRY.jpeg
-        if (img1.includes("PLnNFRY.jpeg")) {
-          [firstCard, secondCard].forEach(card => {
-            const explosion = document.createElement('img');
-            explosion.src = 'https://i.imgur.com/ZQZSWrt.gif';
-            explosion.style.position = 'absolute';
-            explosion.style.width = '100px';
-            explosion.style.height = '100px';
-            explosion.style.top = '0';
-            explosion.style.left = '0';
-            explosion.style.zIndex = '10';
-            explosion.style.borderRadius = '10px';
-            card.appendChild(explosion);
-            setTimeout(() => explosion.remove(), 1000);
-          });
-        }
-
-        // 🏳️‍🌈 Bandera para x96IVje.jpeg
+        // Bandera LGBTQ+ para x96IVje.jpeg
         if (img1.includes("x96IVje.jpeg")) {
-          [firstCard, secondCard].forEach(card => {
-            const bandera = document.createElement('img');
-            bandera.src = 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/Gay_Pride_Flag.svg/320px-Gay_Pride_Flag.svg.png';
-            bandera.style.position = 'absolute';
-            bandera.style.width = '100px';
-            bandera.style.height = '100px';
-            bandera.style.top = '0';
-            bandera.style.left = '0';
-            bandera.style.opacity = '0.85';
-            bandera.style.zIndex = '10';
-            bandera.style.borderRadius = '10px';
+          [firstCard, secondCard].forEach((card) => {
+            const bandera = document.createElement("img");
+            bandera.src =
+              "https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/Gay_Pride_Flag.svg/320px-Gay_Pride_Flag.svg.png";
+            bandera.style.position = "absolute";
+            bandera.style.width = "100px";
+            bandera.style.height = "100px";
+            bandera.style.top = "0";
+            bandera.style.left = "0";
+            bandera.style.opacity = "0.85";
+            bandera.style.zIndex = "10";
+            bandera.style.borderRadius = "10px";
             card.appendChild(bandera);
             setTimeout(() => bandera.remove(), 1000);
           });
@@ -214,17 +223,17 @@
 
         const baneada = 'url("https://i.imgur.com/iYz3DLj.jpeg")';
         if (img1 === baneada) {
-          [firstCard, secondCard].forEach(card => {
-            card.innerHTML = '';
-            const texto = document.createElement('div');
-            texto.textContent = 'BANEADO';
-            texto.style.color = 'red';
-            texto.style.fontWeight = 'bold';
-            texto.style.fontSize = '18px';
-            texto.style.display = 'flex';
-            texto.style.justifyContent = 'center';
-            texto.style.alignItems = 'center';
-            texto.style.height = '100%';
+          [firstCard, secondCard].forEach((card) => {
+            card.innerHTML = "";
+            const texto = document.createElement("div");
+            texto.textContent = "BANEADO";
+            texto.style.color = "red";
+            texto.style.fontWeight = "bold";
+            texto.style.fontSize = "18px";
+            texto.style.display = "flex";
+            texto.style.justifyContent = "center";
+            texto.style.alignItems = "center";
+            texto.style.height = "100%";
             card.appendChild(texto);
           });
         }
@@ -239,12 +248,11 @@
             nivelActual++;
             setTimeout(() => init(), 800);
           } else {
-            endSound.play();
-            const nombre = document.getElementById('nombreJugador').value.trim() || "Anónimo";
-            const tiempoFinal = tiempoAcumulado;
-            saveScore({ nombre, tiempo: tiempoFinal });
-            alert(`¡Felicidades ${nombre}! Completaste todos los niveles en ${tiempoFinal}s`);
-            showScores();
+            if (tiempoAcumulado <= MAX_TIEMPO) {
+              alert("¡Eres Todo Un Unificador! 🎉");
+            } else {
+              alert("No Pudiste unificarlas 😞");
+            }
             nivelActual = 4;
             tiempoAcumulado = 0;
             setTimeout(() => init(), 1000);
@@ -252,8 +260,8 @@
         }
       } else {
         setTimeout(() => {
-          firstCard.classList.remove('flip');
-          secondCard.classList.remove('flip');
+          firstCard.classList.remove("flip");
+          secondCard.classList.remove("flip");
           resetTurn();
         }, 800);
       }
@@ -264,64 +272,34 @@
       lockBoard = false;
     }
 
-    function saveScore(score) {
-      fetch("https://api.sheetbest.com/sheets/eb14502a-3c04-4b3f-b442-513c774e0ae5", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          nombre: score.nombre,
-          tiempo: score.tiempo,
-          fecha: new Date().toISOString()
-        })
-      })
-      .then(() => console.log("Puntaje guardado"))
-      .catch(err => console.error("Error al guardar:", err));
-    }
-
-    function showScores() {
-      const list = document.getElementById('score-list');
-      list.innerHTML = '<li>Cargando...</li>';
-
-      fetch("https://api.sheetbest.com/sheets/eb14502a-3c04-4b3f-b442-513c774e0ae5")
-        .then(res => res.json())
-        .then(data => {
-          const ordenados = data
-            .filter(p => p.nombre && p.tiempo)
-            .sort((a, b) => a.tiempo - b.tiempo)
-            .slice(0, 5);
-          list.innerHTML = '';
-          ordenados.forEach(p => {
-            const li = document.createElement('li');
-            li.textContent = `${p.nombre}: ${p.tiempo} segundos`;
-            list.appendChild(li);
-          });
-        })
-        .catch(err => {
-          list.innerHTML = '<li>Error al cargar datos.</li>';
-        });
-    }
-
     function init() {
       const selectedImages = allImages.slice(0, nivelActual);
       cards = [...selectedImages, ...selectedImages].sort(() => 0.5 - Math.random());
 
-      board.innerHTML = '';
+      board.innerHTML = "";
       matchedPairs = 0;
       startTime = null;
       timerDisplay.textContent = `Tiempo: ${tiempoAcumulado}s`;
       nivelDisplay.textContent = `Nivel ${nivelActual - 3} de 5`;
 
-      cards.forEach(image => {
+      cards.forEach((image) => {
         board.appendChild(createCard(image));
       });
+    }
 
-      showScores();
+    function reiniciarJuego() {
+      nivelActual = 4;
+      tiempoAcumulado = 0;
+      startTime = null;
+      clearInterval(timerInterval);
+      init();
     }
 
     window.onload = init;
   </script>
 </body>
 </html>
+
 
 
 
