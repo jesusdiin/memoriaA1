@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -14,7 +15,7 @@
     }
     h1 { color: #ffeb3b; }
     #level-selector {
-      margin: 15px auto;
+      display: none;
     }
     #game-board {
       display: grid;
@@ -80,11 +81,11 @@
   <div id="level-selector">
     <label>Nivel:</label>
     <select id="nivel">
-      <option value="4">Nivel 1 - 4 pares</option>
-      <option value="5">Nivel 2 - 5 pares</option>
-      <option value="6">Nivel 3 - 6 pares</option>
-      <option value="7">Nivel 4 - 7 pares</option>
-      <option value="8">Nivel 5 - 8 pares</option>
+      <option value="4">Nivel 1</option>
+      <option value="5">Nivel 2</option>
+      <option value="6">Nivel 3</option>
+      <option value="7">Nivel 4</option>
+      <option value="8">Nivel 5</option>
     </select>
     <button onclick="init()">Iniciar Juego</button>
   </div>
@@ -115,6 +116,8 @@
     let matchedPairs = 0;
     let startTime, timerInterval;
     let scores = [];
+    let nivelActual = 4; // Comienza en nivel 1 (4 pares)
+    let tiempoAcumulado = 0;
 
     const board = document.getElementById('game-board');
     const timerDisplay = document.getElementById('timer');
@@ -122,14 +125,15 @@
     function startTimer() {
       startTime = Date.now();
       timerInterval = setInterval(() => {
-        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+        const elapsed = Math.floor((Date.now() - startTime + tiempoAcumulado * 1000) / 1000);
         timerDisplay.textContent = `Tiempo: ${elapsed}s`;
       }, 1000);
     }
 
     function stopTimer() {
       clearInterval(timerInterval);
-      return Math.floor((Date.now() - startTime) / 1000);
+      const total = Math.floor((Date.now() - startTime) / 1000);
+      tiempoAcumulado += total;
     }
 
     function createCard(image) {
@@ -150,7 +154,7 @@
         if (lockBoard || card.classList.contains('flip')) return;
 
         card.classList.add('flip');
-        if (!startTime) startTimer();
+        if (!startTime && nivelActual === 4) startTimer();
 
         if (!firstCard) {
           firstCard = card;
@@ -190,13 +194,22 @@
 
         resetTurn();
         if (matchedPairs === cards.length / 2) {
-          const finalTime = stopTimer();
-          const nombre = document.getElementById('nombreJugador').value.trim() || "Anónimo";
-          scores.push({ nombre, tiempo: finalTime });
+          stopTimer();
 
-          saveScore({ nombre, tiempo: finalTime });
-          alert(`¡Ganaste, ${nombre}! Tiempo: ${finalTime}s`);
-          showScores();
+          if (nivelActual < 8) {
+            nivelActual++;
+            alert(`¡Nivel completado! Avanzando al nivel ${nivelActual - 3}`);
+            setTimeout(() => init(), 1000);
+          } else {
+            const nombre = document.getElementById('nombreJugador').value.trim() || "Anónimo";
+            const tiempoFinal = tiempoAcumulado;
+            scores.push({ nombre, tiempo: tiempoFinal });
+            saveScore({ nombre, tiempo: tiempoFinal });
+            alert(`¡Felicidades ${nombre}! Completaste todos los niveles en ${tiempoFinal}s`);
+            showScores();
+            nivelActual = 4;
+            tiempoAcumulado = 0;
+          }
         }
       } else {
         setTimeout(() => {
@@ -251,14 +264,11 @@
     }
 
     function init() {
-      const nivel = parseInt(document.getElementById('nivel').value);
-      const selectedImages = allImages.slice(0, nivel);
+      const selectedImages = allImages.slice(0, nivelActual);
       cards = [...selectedImages, ...selectedImages].sort(() => 0.5 - Math.random());
 
       board.innerHTML = '';
       matchedPairs = 0;
-      clearInterval(timerInterval);
-      timerDisplay.textContent = 'Tiempo: 0s';
       startTime = null;
 
       cards.forEach(image => {
