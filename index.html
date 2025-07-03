@@ -13,9 +13,10 @@
       margin: 0;
       padding: 20px;
     }
-    h1 { color: #ffeb3b; }
-    #level-selector {
-      display: none;
+    h1 { color: #ffeb3b; margin-bottom: 5px; }
+    #nivelActual {
+      font-size: 18px;
+      margin-bottom: 10px;
     }
     #game-board {
       display: grid;
@@ -78,17 +79,7 @@
     <input type="text" id="nombreJugador" placeholder="Escribe tu nombre...">
   </div>
 
-  <div id="level-selector">
-    <label>Nivel:</label>
-    <select id="nivel">
-      <option value="4">Nivel 1</option>
-      <option value="5">Nivel 2</option>
-      <option value="6">Nivel 3</option>
-      <option value="7">Nivel 4</option>
-      <option value="8">Nivel 5</option>
-    </select>
-    <button onclick="init()">Iniciar Juego</button>
-  </div>
+  <div id="nivelActual">Nivel 1 de 5</div>
 
   <div id="timer">Tiempo: 0s</div>
   <div id="game-board"></div>
@@ -98,6 +89,11 @@
     <ol id="score-list"></ol>
   </div>
 
+  <audio id="flipSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_96264a6a39.mp3?filename=button-124476.mp3"></audio>
+  <audio id="matchSound" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_3d4c8c3934.mp3?filename=correct-2-46134.mp3"></audio>
+  <audio id="winSound" src="https://cdn.pixabay.com/download/audio/2022/10/28/audio_063646bc12.mp3?filename=success-1-6297.mp3"></audio>
+  <audio id="endSound" src="https://cdn.pixabay.com/download/audio/2022/10/19/audio_1e23d3df79.mp3?filename=win-tune-20656.mp3"></audio>
+
   <script>
     const allImages = [
       'https://i.imgur.com/PLnNFRY.jpeg',
@@ -106,7 +102,7 @@
       'https://i.imgur.com/x96IVje.jpeg',
       'https://i.imgur.com/iYz3DLj.jpeg',
       'https://i.imgur.com/HgPrKpC.jpeg',
-      'https://i.imgur.com/feaqi5H.jpeg',
+      'https://i.imgur.com/FN29Lbk.jpeg',
       'https://i.imgur.com/EuvCj1h.jpeg'
     ];
 
@@ -116,11 +112,16 @@
     let matchedPairs = 0;
     let startTime, timerInterval;
     let scores = [];
-    let nivelActual = 4; // Comienza en nivel 1 (4 pares)
+    let nivelActual = 4;
     let tiempoAcumulado = 0;
 
     const board = document.getElementById('game-board');
     const timerDisplay = document.getElementById('timer');
+    const nivelDisplay = document.getElementById('nivelActual');
+    const flipSound = document.getElementById('flipSound');
+    const matchSound = document.getElementById('matchSound');
+    const winSound = document.getElementById('winSound');
+    const endSound = document.getElementById('endSound');
 
     function startTimer() {
       startTime = Date.now();
@@ -153,6 +154,7 @@
       card.addEventListener('click', () => {
         if (lockBoard || card.classList.contains('flip')) return;
 
+        flipSound.play();
         card.classList.add('flip');
         if (!startTime && nivelActual === 4) startTimer();
 
@@ -174,6 +176,40 @@
 
       if (img1 === img2) {
         matchedPairs++;
+        matchSound.play();
+
+        if (img1.includes('PLnNFRY.jpeg')) {
+          [firstCard, secondCard].forEach(card => {
+            const explosion = document.createElement('img');
+            explosion.src = 'https://i.imgur.com/ZQZSWrt.gif';
+            explosion.style.position = 'absolute';
+            explosion.style.width = '100px';
+            explosion.style.height = '100px';
+            explosion.style.top = '0';
+            explosion.style.left = '0';
+            explosion.style.borderRadius = '10px';
+            explosion.style.zIndex = '10';
+            card.appendChild(explosion);
+            setTimeout(() => explosion.remove(), 1000);
+          });
+        }
+
+        if (img1.includes('x96IVje.jpeg')) {
+          [firstCard, secondCard].forEach(card => {
+            const bandera = document.createElement('img');
+            bandera.src = 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/48/Gay_Pride_Flag.svg/320px-Gay_Pride_Flag.svg.png';
+            bandera.style.position = 'absolute';
+            bandera.style.width = '100px';
+            bandera.style.height = '100px';
+            bandera.style.top = '0';
+            bandera.style.left = '0';
+            bandera.style.opacity = '0.85';
+            bandera.style.borderRadius = '10px';
+            bandera.style.zIndex = '10';
+            card.appendChild(bandera);
+            setTimeout(() => bandera.remove(), 1200);
+          });
+        }
 
         const baneada = 'url("https://i.imgur.com/iYz3DLj.jpeg")';
         if (img1 === baneada) {
@@ -195,12 +231,13 @@
         resetTurn();
         if (matchedPairs === cards.length / 2) {
           stopTimer();
+          winSound.play();
 
           if (nivelActual < 8) {
             nivelActual++;
-            alert(`¡Nivel completado! Avanzando al nivel ${nivelActual - 3}`);
-            setTimeout(() => init(), 1000);
+            setTimeout(() => init(), 800);
           } else {
+            endSound.play();
             const nombre = document.getElementById('nombreJugador').value.trim() || "Anónimo";
             const tiempoFinal = tiempoAcumulado;
             scores.push({ nombre, tiempo: tiempoFinal });
@@ -209,6 +246,7 @@
             showScores();
             nivelActual = 4;
             tiempoAcumulado = 0;
+            setTimeout(() => init(), 1000);
           }
         }
       } else {
@@ -270,6 +308,7 @@
       board.innerHTML = '';
       matchedPairs = 0;
       startTime = null;
+      nivelDisplay.textContent = `Nivel ${nivelActual - 3} de 5`;
 
       cards.forEach(image => {
         board.appendChild(createCard(image));
@@ -278,10 +317,11 @@
       showScores();
     }
 
-    init();
+    window.onload = init;
   </script>
 </body>
 </html>
+
 
 
 
