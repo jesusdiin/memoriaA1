@@ -85,15 +85,48 @@
       background: rgba(255,255,255,0.5);
       border-radius: 10px;
     }
+
+     .facebook-btn {
+    background-color: #1877f2;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    font-size: 16px;
+    font-weight: 500;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+  }
+
+  .facebook-btn i {
+    font-size: 18px;
+  }
+
+  .facebook-btn:hover {
+    background-color: #145dbf;
+    transform: translateY(-2px);
+  }
+
+  .facebook-btn:active {
+    transform: translateY(0);
+  }
   </style>
 </head>
 <body>
   <h1>🧠 Juego de Memoria A1</h1>
 
-  <div>
-    <label>Tu nombre:</label><br />
-    <input type="text" id="nombreJugador" placeholder="Escribe tu nombre..." />
-  </div>
+ 
+    <div>
+      <button onclick="init()" id="startBtn">Iniciar Juego</button>
+
+      <button id="loginBtn" class="facebook-btn">
+        <i class="fab fa-facebook-f"></i>
+        Iniciar sesión con Facebook
+      </button>
+    </div>
 
   <div id="nivelActual">Nivel 1 de 6</div>
   <div id="timer">Tiempo: 0s</div>
@@ -109,7 +142,51 @@
   <audio id="winSound" src="https://cdn.pixabay.com/audio/2022/10/28/audio_063646bc12.mp3"></audio>
   <audio id="endSound" src="https://cdn.pixabay.com/audio/2022/10/19/audio_1e23d3df79.mp3"></audio>
 
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+
   <script>
+
+let jwtToken = null;
+let currentUser = null;
+
+document.getElementById("loginBtn").addEventListener("click", () => {
+  window.location.href = "http://localhost:3001/auth/facebook";
+});
+
+const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.has("token")) {
+  jwtToken = urlParams.get("token");
+  localStorage.setItem("token", jwtToken);
+  history.replaceState(null, null, window.location.pathname); 
+
+  fetchUserData();
+} else {
+  jwtToken = localStorage.getItem("token");
+  if (jwtToken) fetchUserData();
+}
+
+async function fetchUserData() {
+  try {
+    const response = await fetch("http://localhost:3001/auth/me", {
+      headers: {
+        Authorization: `Bearer ${jwtToken}`
+      }
+    });
+
+    if (!response.ok) throw new Error("No autorizado");
+
+    currentUser = await response.json();
+    document.getElementById("loginBtn").textContent = `👤 ${currentUser.name}`;
+    document.getElementById("loginBtn").disabled = true;
+  } catch (e) {
+    console.error("Error al obtener el usuario", e);
+    jwtToken = null;
+    localStorage.removeItem("token");
+  }
+}
+
+
     const allImages = [
       "https://i.imgur.com/PLnNFRY.jpeg", // efecto explosión 💥
       "https://i.imgur.com/xksxztO.jpeg", // texto A1
@@ -130,7 +207,7 @@
     let cards = [], firstCard = null, secondCard = null, lockBoard = false;
     let matchedPairs = 0;
     let startTime = null, timerInterval = null;
-    let totalTimeLimit = 130; // segundos
+    let totalTimeLimit = 150; 
 
     const board = document.getElementById("game-board");
     const timerDisplay = document.getElementById("timer");
@@ -180,7 +257,12 @@
       card.addEventListener("click", () => {
         if (lockBoard || card.classList.contains("flip")) return;
 
-        flipSound.play();
+        try {
+          flipSound.play();
+        } catch (e) {
+          console.warn("Audio no permitido aún", e);
+        }
+
 
         card.classList.add("flip");
         if (!startTime) startTimer();
@@ -267,14 +349,9 @@
 
         if (matchedPairs === cards.length / 2) {
           if (nivelActual === TOTAL_NIVELES) {
-            const finalTime = stopTimer();
-            const nombre = nombreInput.value.trim() || "Anónimo";
-            saveScore(finalTime, nombre);
-            endGame(finalTime <= totalTimeLimit);
-          } else {
-            nivelActual++;
-            loadLevel(nivelActual);
+            endGame(true); 
           }
+
         }
       } else {
         setTimeout(() => {
@@ -290,34 +367,46 @@
       lockBoard = false;
     }
 
-    async function saveScore(seconds, nombre) {
-      try {
-        // Aquí se puede poner la integración con alguna API o servicio externo.
-        // Por ahora solo guarda localmente:
-        let scores = JSON.parse(localStorage.getItem("memoryScores") || "[]");
-        scores.push({ nombre, tiempo: seconds, timestamp: new Date().toISOString() });
-        scores.sort((a, b) => a.tiempo - b.tiempo);
-        localStorage.setItem("memoryScores", JSON.stringify(scores.slice(0, 5)));
-        showScores();
-      } catch (e) {
-        console.error("Error guardando puntuación", e);
-      }
-    }
+async function saveScore(seconds) {
+  if (!jwtToken || !currentUser) return;
 
-    function showScores() {
-      const list = document.getElementById("score-list");
-      let scores = JSON.parse(localStorage.getItem("memoryScores") || "[]");
-      list.innerHTML = "";
-      if (scores.length === 0) {
-        list.innerHTML = "<li>No hay puntajes aún</li>";
-        return;
-      }
-      scores.slice(0, 5).forEach((p) => {
-        const li = document.createElement("li");
-        li.textContent = `${p.nombre}: ${p.tiempo} segundos`;
-        list.appendChild(li);
-      });
-    }
+  try {
+    const res = await fetch("http://localhost:3001/scores", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${jwtToken}`
+      },
+      body: JSON.stringify({ tiempo: seconds })
+    });
+
+    if (!res.ok) throw new Error("Error al guardar");
+
+    const data = await res.json();
+    console.log("Score guardado:", data);
+  } catch (e) {
+    console.error("Error guardando score:", e);
+  }
+}
+
+  async function loadTopScores() {
+  try {
+    const res = await fetch("http://localhost:3001/scores");
+    const scores = await res.json();
+
+    const list = document.getElementById("score-list");
+    list.innerHTML = "";
+
+    scores.forEach((s) => {
+      const li = document.createElement("li");
+      li.textContent = `${s.user.name}: ${s.tiempo} segundos`;
+      list.appendChild(li);
+    });
+  } catch (e) {
+    console.error("Error cargando scores", e);
+  }
+}
+
 
     function loadLevel(nivel) {
       nivelDisplay.textContent = `Nivel ${nivel} de ${TOTAL_NIVELES}`;
@@ -338,25 +427,36 @@
       if (!startTime) startTimer();
     }
 
-    function endGame(won) {
-      lockBoard = true;
-      if (won) {
-        alert("🎉 Eres Todo Un Unificador 🎉");
-      } else {
-        alert("😞 No Pudiste unificarlas 😞");
-      }
-      winSound.play();
-      showScores();
-    }
+function endGame(won) {
+  lockBoard = true;
+  const finalTime = stopTimer();  
 
-    function init() {
-      nivelActual = 1;
-      startTime = null;
-      clearInterval(timerInterval);
-      timerDisplay.textContent = "Tiempo: 0s";
-      loadLevel(nivelActual);
-      showScores();
-    }
+  if (jwtToken && currentUser) {
+    saveScore(finalTime);  
+  }
+
+  if (won) {
+    alert("🎉 Eres Todo Un Unificador 🎉");
+  } else {
+    alert("😞 No Pudiste unificarlas 😞");
+  }
+
+  loadTopScores(); 
+}
+
+
+
+function init() {
+  nivelActual = 1;
+  startTime = null;
+  clearInterval(timerInterval);
+  timerDisplay.textContent = "Tiempo: 0s";
+  loadLevel(nivelActual);
+  loadTopScores();
+  document.getElementById("startBtn").style.display = "none"; 
+}
+
+
 
     init();
   </script>
