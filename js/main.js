@@ -1,5 +1,13 @@
-let jwtToken = null;
-let currentUser = null;
+let nivelStartTime = null;
+let tiemposPorNivel = [];
+
+const startLevelTimer = () => {
+  nivelStartTime = Date.now();
+}
+
+const stopLevelTimer = () => {
+  return Math.floor((Date.now() - nivelStartTime) / 1000);
+}
 
 document.getElementById("loginBtn").addEventListener("click", () => {
   window.location.href = "http://localhost:3001/auth/facebook";
@@ -28,14 +36,27 @@ async function fetchUserData() {
     if (!response.ok) throw new Error("No autorizado");
 
     currentUser = await response.json();
-    document.getElementById("loginBtn").textContent = `👤 ${currentUser.name}`;
-    document.getElementById("loginBtn").disabled = true;
+
+    const loginBtn = document.getElementById("loginBtn");
+    loginBtn.textContent = `👤 ${currentUser.name}`;
+    loginBtn.disabled = true;
+
+    if (currentUser.photo) {
+      const img = document.createElement("img");
+      img.src = currentUser.photo; // URL de Facebook
+      img.style.width = "32px";
+      img.style.height = "32px";
+      img.style.borderRadius = "50%";
+      img.style.marginLeft = "8px";
+      loginBtn.appendChild(img);
+    }
   } catch (e) {
     console.error("Error al obtener el usuario", e);
     jwtToken = null;
     localStorage.removeItem("token");
   }
 }
+
 
 
     const allImages = [
@@ -58,7 +79,7 @@ async function fetchUserData() {
     let cards = [], firstCard = null, secondCard = null, lockBoard = false;
     let matchedPairs = 0;
     let startTime = null, timerInterval = null;
-    let totalTimeLimit = 150; // segundos
+    let totalTimeLimit = 250; // segundos
 
     const board = document.getElementById("game-board");
     const timerDisplay = document.getElementById("timer");
@@ -199,15 +220,19 @@ async function fetchUserData() {
         resetTurn();
 
         if (matchedPairs === cards.length / 2) {
+            const tiempoNivel = stopLevelTimer();
+            tiemposPorNivel.push({ nivel: nivelActual, tiempo: tiempoNivel });
+
             if (nivelActual === TOTAL_NIVELES) {
-                endGame(true); 
+                endGame(true);
             } else {
                 nivelActual++;
                 setTimeout(() => {
-                loadLevel(nivelActual);
+                    loadLevel(nivelActual);
                 }, 1000);
             }
         }
+
 
       } else {
         setTimeout(() => {
@@ -245,7 +270,7 @@ async function saveScore(seconds) {
   }
 }
 
-  async function loadTopScores() {
+async function loadTopScores() {
   try {
     const res = await fetch("http://localhost:3001/scores");
     const scores = await res.json();
@@ -255,13 +280,29 @@ async function saveScore(seconds) {
 
     scores.forEach((s) => {
       const li = document.createElement("li");
-      li.textContent = `${s.user.name}: ${s.tiempo} segundos`;
+      li.style.display = "flex";
+      li.style.alignItems = "center";
+      li.style.marginBottom = "8px";
+      li.style.gap = "8px";
+
+      const img = document.createElement("img");
+      img.src = s.user.photo || "https://via.placeholder.com/32";
+      img.style.width = "32px";
+      img.style.height = "32px";
+      img.style.borderRadius = "50%";
+
+      const text = document.createElement("span");
+      text.textContent = `${s.user.name}: ${s.tiempo} segundos`;
+
+      li.appendChild(img);
+      li.appendChild(text);
       list.appendChild(li);
     });
   } catch (e) {
     console.error("Error cargando scores", e);
   }
 }
+
 
 
     function loadLevel(nivel) {
@@ -280,7 +321,7 @@ async function saveScore(seconds) {
 
       cards.forEach(image => board.appendChild(createCard(image)));
 
-      if (!startTime) startTimer();
+      startLevelTimer();
     }
 
 function endGame(won) {
@@ -288,14 +329,13 @@ function endGame(won) {
   const finalTime = stopTimer();
 
   if (jwtToken && currentUser) {
-    saveScore(finalTime);
+    saveScore(tiemposPorNivel);
   }
 
-  if (won) {
-    alert("🎉 Eres Todo Un Unificador 🎉");
-  } else {
-    alert("😞 No Pudiste unificarlas 😞");
-  }
+  let mensaje = won ? "🎉 Eres Todo Un Unificador 🎉" : "😞 No Pudiste unificarlas 😞";
+  mensaje += "\n\nTiempos por nivel:\n" + tiemposPorNivel
+    .map(t => `Nivel ${t.nivel}: ${t.tiempo}s`)
+    .join("\n");
 
   loadTopScores(); 
 }
