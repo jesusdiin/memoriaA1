@@ -278,30 +278,42 @@ async function loadTopScores(limit = 5) {
     const list = document.getElementById("score-list");
     list.innerHTML = "";
 
-    scores.slice(0, limit).forEach((s) => {
+    scores.slice(0, limit).forEach((s, index) => {
       const li = document.createElement("li");
-      li.style.display = "flex";
-      li.style.alignItems = "center";
-      li.style.marginBottom = "8px";
-      li.style.gap = "8px";
+      li.className = "score-item";
+
+      const rank = document.createElement("span");
+      rank.className = "rank";
+      rank.textContent = index + 1;
 
       const img = document.createElement("img");
       img.src = s.user.photo || "https://via.placeholder.com/32";
-      img.style.width = "32px";
-      img.style.height = "32px";
-      img.style.borderRadius = "50%";
+      img.alt = s.user.name;
+      img.className = "player-photo";
 
       const text = document.createElement("span");
-      text.textContent = `${s.user.name}: ${s.tiempo} segundos`;
+      text.className = "player-info";
+      text.textContent = `${s.user.name} — ${s.tiempo}s`;
 
+      li.appendChild(rank);
       li.appendChild(img);
       li.appendChild(text);
+
       list.appendChild(li);
     });
   } catch (e) {
     console.error("Error cargando scores", e);
   }
 }
+
+// Inicial por defecto
+loadTopScores(5);
+
+// Cambiar entre top 5 / top 10
+document.getElementById("score-limit").addEventListener("change", (e) => {
+  loadTopScores(parseInt(e.target.value, 10));
+});
+
 
 loadTopScores(5);
 

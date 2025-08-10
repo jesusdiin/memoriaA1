@@ -136,3 +136,62 @@ body {
 }
 
 
+#top-scores {
+  margin-top: 30px;
+  background: #ffffff22;
+  padding: 15px;
+  border-radius: 10px;
+}
+
+.score-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 15px;
+}
+
+#score-limit {
+  padding: 5px 10px;
+  border-radius: 6px;
+  border: none;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+#score-list {
+  text-align: left;
+  max-width: 300px;
+  margin: auto;
+  padding-left: 0;
+  list-style: none;
+}
+
+.score-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  padding: 6px 10px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+}
+
+.rank {
+  font-weight: bold;
+  font-size: 16px;
+  color: #ffeb3b;
+  width: 20px;
+  text-align: right;
+}
+
+.player-photo {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+}
+
+.player-info {
+  flex: 1;
+  font-size: 14px;
+}
