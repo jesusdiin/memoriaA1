@@ -79,7 +79,7 @@ async function fetchUserData() {
     let cards = [], firstCard = null, secondCard = null, lockBoard = false;
     let matchedPairs = 0;
     let startTime = null, timerInterval = null;
-    let totalTimeLimit = 250; // segundos
+    let totalTimeLimit = 450;
 
     const board = document.getElementById("game-board");
     const timerDisplay = document.getElementById("timer");
@@ -258,7 +258,7 @@ async function saveScore(seconds) {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${jwtToken}`
       },
-      body: JSON.stringify({ tiempo: seconds }) // ✅ ahora envía número
+      body: JSON.stringify({ tiempo: seconds }) 
     });
 
     if (!res.ok) throw new Error("Error al guardar");
@@ -341,9 +341,6 @@ function endGame(won) {
   loadTopScores();
 }
 
-
-
-
 function init() {
   nivelActual = 1;
   startTime = null;
@@ -351,9 +348,8 @@ function init() {
   timerDisplay.textContent = "Tiempo: 0s";
   loadLevel(nivelActual);
   loadTopScores();
-  document.getElementById("startBtn").style.display = "none"; // ocultar botón
+  document.getElementById("startBtn").style.display = "none";
 }
 
 
-
-    init();
+init();
