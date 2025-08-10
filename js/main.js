@@ -10,7 +10,7 @@ const stopLevelTimer = () => {
 }
 
 document.getElementById("loginBtn").addEventListener("click", () => {
-  window.location.href = "http://localhost:3001/auth/facebook";
+  window.location.href = "https://memoriaa1.onrender.com/auth/facebook";
 });
 
 const urlParams = new URLSearchParams(window.location.search);
@@ -27,7 +27,7 @@ if (urlParams.has("token")) {
 
 async function fetchUserData() {
   try {
-    const response = await fetch("http://localhost:3001/auth/me", {
+    const response = await fetch("https://memoriaa1.onrender.com/auth/me", {
       headers: {
         Authorization: `Bearer ${jwtToken}`
       }
@@ -252,7 +252,7 @@ async function saveScore(seconds) {
   if (!jwtToken || !currentUser) return;
 
   try {
-    const res = await fetch("http://localhost:3001/scores", {
+    const res = await fetch("https://memoriaa1.onrender.com/scores", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -272,7 +272,7 @@ async function saveScore(seconds) {
 
 async function loadTopScores() {
   try {
-    const res = await fetch("http://localhost:3001/scores");
+    const res = await fetch("https://memoriaa1.onrender.com/scores");
     const scores = await res.json();
 
     const list = document.getElementById("score-list");
