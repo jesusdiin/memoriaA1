@@ -29,10 +29,18 @@
   <div id="fb-root"></div>
 
 
-  <div id="top-scores">
-    <h2>🏆 Top 5 Tiempos</h2>
-    <ol id="score-list"></ol>
-  </div>
+<div id="top-scores">
+  <h2>🏆 Mejores Tiempos</h2>
+
+  <label for="score-limit">Mostrar:</label>
+  <select id="score-limit">
+    <option value="5" selected>Top 5</option>
+    <option value="10">Top 10</option>
+  </select>
+
+  <ol id="score-list"></ol>
+</div>
+
 
   <div style="background: white; padding: 15px; border-radius: 10px; max-width: 500px; margin: 0 auto;">
     <div

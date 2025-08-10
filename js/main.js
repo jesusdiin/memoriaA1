@@ -270,7 +270,7 @@ async function saveScore(seconds) {
 }
 
 
-async function loadTopScores() {
+async function loadTopScores(limit = 5) {
   try {
     const res = await fetch("https://memoriaa1.onrender.com/scores");
     const scores = await res.json();
@@ -278,7 +278,7 @@ async function loadTopScores() {
     const list = document.getElementById("score-list");
     list.innerHTML = "";
 
-    scores.forEach((s) => {
+    scores.slice(0, limit).forEach((s) => {
       const li = document.createElement("li");
       li.style.display = "flex";
       li.style.alignItems = "center";
@@ -302,6 +302,14 @@ async function loadTopScores() {
     console.error("Error cargando scores", e);
   }
 }
+
+loadTopScores(5);
+
+document.getElementById("score-limit").addEventListener("change", (e) => {
+  const limit = parseInt(e.target.value, 10);
+  loadTopScores(limit);
+});
+
 
 
 

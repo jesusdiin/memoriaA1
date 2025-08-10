@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 export const getTopScores = async () => {
 	return await prisma.score.findMany({
 		orderBy: { tiempo: "asc" },
-		take: 5,
+		take: 20,
 		include: {
 			user: {
 				select: { name: true, photo: true },
