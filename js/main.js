@@ -258,17 +258,17 @@ async function saveScore(seconds) {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${jwtToken}`
       },
-      body: JSON.stringify({ tiempo: seconds })
+      body: JSON.stringify({ tiempo: seconds }) // ✅ ahora envía número
     });
 
     if (!res.ok) throw new Error("Error al guardar");
-
     const data = await res.json();
     console.log("Score guardado:", data);
   } catch (e) {
     console.error("Error guardando score:", e);
   }
 }
+
 
 async function loadTopScores() {
   try {
@@ -329,7 +329,8 @@ function endGame(won) {
   const finalTime = stopTimer();
 
   if (jwtToken && currentUser) {
-    saveScore(tiemposPorNivel);
+    const tiempoTotal = tiemposPorNivel.reduce((acc, t) => acc + t.tiempo, 0);
+    saveScore(tiempoTotal); // ✅ ahora es un número
   }
 
   let mensaje = won ? "🎉 Eres Todo Un Unificador 🎉" : "😞 No Pudiste unificarlas 😞";
@@ -337,8 +338,9 @@ function endGame(won) {
     .map(t => `Nivel ${t.nivel}: ${t.tiempo}s`)
     .join("\n");
 
-  loadTopScores(); 
+  loadTopScores();
 }
+
 
 
 
