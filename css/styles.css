@@ -1,11 +1,30 @@
-    body {
-      font-family: sans-serif;
-      text-align: center;
-      background: #007BFF;
-      color: #fff;
-      margin: 0;
-      padding: 20px;
-    }
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}    
+    
+   body {
+  min-height: 100vh;
+  background: #007BFF;
+  color: #fff;
+  font-family: sans-serif;
+  text-align: center;
+  padding: 20px;
+  box-sizing: border-box;
+}
+body {
+  background: #007BFF !important;
+  color: #fff !important;
+}
+
+@media (prefers-color-scheme: dark) {
+  body {
+    background: #007BFF !important;
+    color: #fff !important;
+  }
+}
+
     h1 { color: #ffeb3b; margin-bottom: 5px; }
     #nivelActual {
       font-size: 18px;
@@ -109,11 +128,11 @@
   }
 
 
-  .fb-comments {
-    padding-top: 10px;
-  background: white;
-  border-radius: 10px;
-  box-shadow: 0 4px 12px rgb(0 0 0 / 0.15);
-  max-width: 100%;
-  margin: 0px auto;
+.fb-comments {
+  padding-top: 10px !important;
+  background: white !important;
+  border-radius: 10px !important;
+  box-shadow: 0 4px 12px rgb(0 0 0 / 0.15) !important;
+  max-width: 100% !important;
+  margin: 0 auto !important;
 }
