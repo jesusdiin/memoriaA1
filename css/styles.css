@@ -107,3 +107,13 @@
   .facebook-btn:active {
     transform: translateY(0);
   }
+
+
+  .fb-comments {
+    padding-top: 10px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgb(0 0 0 / 0.15);
+  max-width: 100%;
+  margin: 0px auto;
+}
