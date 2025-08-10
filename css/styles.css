@@ -1,0 +1,109 @@
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      background: #007BFF;
+      color: #fff;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 { color: #ffeb3b; margin-bottom: 5px; }
+    #nivelActual {
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+    #game-board {
+      display: grid;
+      grid-template-columns: repeat(4, 100px);
+      grid-gap: 10px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+    .card {
+      width: 100px;
+      height: 100px;
+      background-color: #ffffff;
+      border: 3px solid #4CAF50;
+      cursor: pointer;
+      position: relative;
+      perspective: 600px;
+      border-radius: 10px;
+      user-select: none;
+    }
+    .card.flip .front { transform: rotateY(180deg); }
+    .card.flip .back { transform: rotateY(0deg); }
+    .card .front, .card .back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      transition: transform 0.4s;
+      border-radius: 10px;
+    }
+    .card .front { transform: rotateY(0deg); background: #ccc; }
+    .card .back {
+      transform: rotateY(180deg);
+      background-size: cover;
+      background-position: center;
+    }
+    #timer { margin-top: 15px; font-size: 20px; }
+    input {
+      padding: 5px;
+      border-radius: 5px;
+      border: none;
+      margin: 10px 0;
+    }
+    #top-scores {
+      margin-top: 30px;
+      background: #ffffff22;
+      padding: 15px;
+      border-radius: 10px;
+    }
+    #score-list {
+      text-align: left;
+      max-width: 300px;
+      margin: auto;
+    }
+    .effect-overlay {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 32px;
+      font-weight: bold;
+      color: red;
+      pointer-events: none;
+      user-select: none;
+      z-index: 10;
+      background: rgba(255,255,255,0.5);
+      border-radius: 10px;
+    }
+
+     .facebook-btn {
+    background-color: #1877f2;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    font-size: 16px;
+    font-weight: 500;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+  }
+
+  .facebook-btn i {
+    font-size: 18px;
+  }
+
+  .facebook-btn:hover {
+    background-color: #145dbf;
+    transform: translateY(-2px);
+  }
+
+  .facebook-btn:active {
+    transform: translateY(0);
+  }
