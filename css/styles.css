@@ -127,12 +127,12 @@ body {
     transform: translateY(0);
   }
 
-
 .fb-comments {
-  padding-top: 10px !important;
-  background: white !important;
-  border-radius: 10px !important;
-  box-shadow: 0 4px 12px rgb(0 0 0 / 0.15) !important;
-  max-width: 100% !important;
-  margin: 0 auto !important;
+  padding-top: 10px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  max-width: 100%;
+  margin: 0 auto;
 }
+
+
