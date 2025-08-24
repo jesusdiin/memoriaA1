@@ -2,7 +2,13 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Juego de Memoria A1</title>
+    <link rel="stylesheet" href="./css/styles.css">
+    <script async defer crossorigin="anonymous" 
+    src="https://connect.facebook.net/es_ES/sdk.js#xfbml=1&version=v23.0" 
+    nonce="abc123">
+  </script>
 </head>
 <body>
   <h1>🧠 Juego de Memoria A1</h1>
@@ -16,15 +22,47 @@
       </button>
     </div>
 
-  <div id="nivelActual">Nivel 1 de 6</div>
+  <div style="padding-top: 10px; border-top: 5px;" id="nivelActual">Nivel 1 de 6</div>
   <div id="timer">Tiempo: 0s</div>
   <div id="game-board"></div>
 
-  <div id="top-scores">
-    <h2>🏆 Top 5 Tiempos</h2>
-    <ol id="score-list"></ol>
+  <div id="fb-root"></div>
+
+
+<div id="top-scores">
+  <h2>🏆 Mejores Tiempos</h2>
+
+  <div class="score-header">
+    <label for="score-limit">Mostrar:</label>
+    <select id="score-limit">
+      <option value="5" selected>Top 5</option>
+      <option value="10">Top 10</option>
+    </select>
   </div>
 
+  <ol id="score-list"></ol>
+</div>
+
+
+
+  <div style="background: white; padding: 15px; border-radius: 10px; max-width: 500px; margin: 0 auto;">
+    <div
+      class="fb-comments"
+      data-href="https://jesusdiin.github.io/memoriaA1"
+      data-width="100%"
+      data-numposts="5"
+    ></div>
+  </div>
+
+
+  <div>
+    <a href="politica-de-privacidad.html" target="_blank">Política de Privacidad</a>
+    <a href="eliminacion-datos-de-usuario.html" target="_blank" rel="noopener noreferrer">Eliminación de Datos</a>
+  </div>
+
+</body>
+
+  <footer>
   <audio id="flipSound" src="https://cdn.pixabay.com/audio/2022/03/15/audio_96264a6a39.mp3"></audio>
   <audio id="matchSound" src="https://cdn.pixabay.com/audio/2022/03/15/audio_3d4c8c3934.mp3"></audio>
   <audio id="winSound" src="https://cdn.pixabay.com/audio/2022/10/28/audio_063646bc12.mp3"></audio>
@@ -33,16 +71,5 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
   <script src="./js/main.js"></script>
-  <link rel="stylesheet" href="./css/styles.css">
-
-</body>
+  </footer>
 </html>
-
-
-
-
-
-
-
-   
-

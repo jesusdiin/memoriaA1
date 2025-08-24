@@ -20,7 +20,7 @@ router.get(
 		expiresIn: "7d",
 	});
 
-		res.redirect(`http://localhost:5500/index.html?token=${token}`);
+		res.redirect(`https://jesusdiin.github.io/memoriaA1/index.html?token=${token}`);
 	}	
 );
 

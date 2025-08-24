@@ -10,7 +10,7 @@ const stopLevelTimer = () => {
 }
 
 document.getElementById("loginBtn").addEventListener("click", () => {
-  window.location.href = "http://localhost:3001/auth/facebook";
+  window.location.href = "https://memoriaa1.onrender.com/auth/facebook";
 });
 
 const urlParams = new URLSearchParams(window.location.search);
@@ -27,7 +27,7 @@ if (urlParams.has("token")) {
 
 async function fetchUserData() {
   try {
-    const response = await fetch("http://localhost:3001/auth/me", {
+    const response = await fetch("https://memoriaa1.onrender.com/auth/me", {
       headers: {
         Authorization: `Bearer ${jwtToken}`
       }
@@ -79,7 +79,7 @@ async function fetchUserData() {
     let cards = [], firstCard = null, secondCard = null, lockBoard = false;
     let matchedPairs = 0;
     let startTime = null, timerInterval = null;
-    let totalTimeLimit = 250; // segundos
+    let totalTimeLimit = 450;
 
     const board = document.getElementById("game-board");
     const timerDisplay = document.getElementById("timer");
@@ -252,17 +252,16 @@ async function saveScore(seconds) {
   if (!jwtToken || !currentUser) return;
 
   try {
-    const res = await fetch("http://localhost:3001/scores", {
+    const res = await fetch("https://memoriaa1.onrender.com/scores", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${jwtToken}`
       },
-      body: JSON.stringify({ tiempo: seconds })
+      body: JSON.stringify({ tiempo: seconds }) 
     });
 
     if (!res.ok) throw new Error("Error al guardar");
-
     const data = await res.json();
     console.log("Score guardado:", data);
   } catch (e) {
@@ -270,38 +269,59 @@ async function saveScore(seconds) {
   }
 }
 
-async function loadTopScores() {
+
+async function loadTopScores(limit = 5) {
   try {
-    const res = await fetch("http://localhost:3001/scores");
+    const res = await fetch("https://memoriaa1.onrender.com/scores");
     const scores = await res.json();
 
     const list = document.getElementById("score-list");
     list.innerHTML = "";
 
-    scores.forEach((s) => {
+    scores.slice(0, limit).forEach((s, index) => {
       const li = document.createElement("li");
-      li.style.display = "flex";
-      li.style.alignItems = "center";
-      li.style.marginBottom = "8px";
-      li.style.gap = "8px";
+      li.className = "score-item";
+
+      const rank = document.createElement("span");
+      rank.className = "rank";
+      rank.textContent = index + 1;
 
       const img = document.createElement("img");
       img.src = s.user.photo || "https://via.placeholder.com/32";
-      img.style.width = "32px";
-      img.style.height = "32px";
-      img.style.borderRadius = "50%";
+      img.alt = s.user.name;
+      img.className = "player-photo";
 
       const text = document.createElement("span");
-      text.textContent = `${s.user.name}: ${s.tiempo} segundos`;
+      text.className = "player-info";
+      text.textContent = `${s.user.name} — ${s.tiempo}s`;
 
+      li.appendChild(rank);
       li.appendChild(img);
       li.appendChild(text);
+
       list.appendChild(li);
     });
   } catch (e) {
     console.error("Error cargando scores", e);
   }
 }
+
+// Inicial por defecto
+loadTopScores(5);
+
+// Cambiar entre top 5 / top 10
+document.getElementById("score-limit").addEventListener("change", (e) => {
+  loadTopScores(parseInt(e.target.value, 10));
+});
+
+
+loadTopScores(5);
+
+document.getElementById("score-limit").addEventListener("change", (e) => {
+  const limit = parseInt(e.target.value, 10);
+  loadTopScores(limit);
+});
+
 
 
 
@@ -329,7 +349,8 @@ function endGame(won) {
   const finalTime = stopTimer();
 
   if (jwtToken && currentUser) {
-    saveScore(tiemposPorNivel);
+    const tiempoTotal = tiemposPorNivel.reduce((acc, t) => acc + t.tiempo, 0);
+    saveScore(tiempoTotal); // ✅ ahora es un número
   }
 
   let mensaje = won ? "🎉 Eres Todo Un Unificador 🎉" : "😞 No Pudiste unificarlas 😞";
@@ -337,10 +358,8 @@ function endGame(won) {
     .map(t => `Nivel ${t.nivel}: ${t.tiempo}s`)
     .join("\n");
 
-  loadTopScores(); 
+  loadTopScores();
 }
-
-
 
 function init() {
   nivelActual = 1;
@@ -349,9 +368,8 @@ function init() {
   timerDisplay.textContent = "Tiempo: 0s";
   loadLevel(nivelActual);
   loadTopScores();
-  document.getElementById("startBtn").style.display = "none"; // ocultar botón
+  document.getElementById("startBtn").style.display = "none";
 }
 
 
-
-    init();
+init();
